@@ -1,11 +1,14 @@
 import urllib
+import os
 
 import cv2
 import numpy as np
 import roboflow
 from flask import Flask, request
 
-rf = roboflow.Roboflow(api_key='3ExsCVK8YEvuuYeNcGnS')
+ROBOFLOW_API_KEY= os.environ['ROBOFLOW_API_KEY']
+
+rf = roboflow.Roboflow(api_key=ROBOFLOW_API_KEY)
 
 project = rf.workspace("nishanth").project("x-ray-mask")
 model = project.version(1).model
@@ -46,7 +49,7 @@ def save_image(image, predictions, output_path):
             stroke_color = hex_to_rgb(colors[class_name][1:])
         points = [[int(p["x"]), int(p["y"])] for p in prediction["points"]]
         np_points = np.array(points, dtype=np.int32)
-        cv2.polylines(
+        cv2.fillPoly(
             image,
             [np_points],
             isClosed=True,
@@ -67,7 +70,7 @@ def hello_world():
     return '''
     <html>
    <body>
-      <form action = "http://localhost:6003/uploader" method = "POST" 
+      <form action = "http://localhost:6003/uploader" method = "POST"
          enctype = "multipart/form-data">
          <input type = "file" name = "file" />
          <input type = "submit"/>
